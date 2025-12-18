@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Room Map</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    #container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+    #container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    .label {
+      position: absolute;
+      padding: 2px 6px;
+      font-size: 12px;
+      color: white;
+      background: #333;
+      border-radius: 4px;
+      cursor: move;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100px;
+      opacity: 0;
+      transition: all 0.3s ease-in-out;
+      z-index: 10;
+    }
+    .label:hover {
+      opacity: 1;
+      max-width: 300px;
+      font-size: 14px;
+      background: #000;
+    }
+    .label[contenteditable]:focus {
+      outline: 2px dashed #888;
+    }
+    .delete-btn {
+      display: none;
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 10px;
+      cursor: pointer;
+      z-index: 20;
+    }
+    .label:hover .delete-btn {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="overlay-instructions" style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 12px 16px; font-size: 16px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 1000;">
+    Double-click anywhere to add a label. Hover to expand. Click ❌ to delete.
+  </div>
+
+  <div id="container">
+    <img src="floorplan.jpg" alt="Floorplan" />
+  </div>
+  <script>
+    const container = document.getElementById("container");
+
+    container.ondblclick = (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const label = document.createElement("div");
+      label.className = "label";
+      label.contentEditable = true;
+      label.style.left = x + "px";
+      label.style.top = y + "px";
+      label.innerText = "Hover to expand";
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.innerText = "×";
+      deleteBtn.onclick = (event) => {
+        event.stopPropagation();
+        label.remove();
+      };
+
+      label.appendChild(deleteBtn);
+      container.appendChild(label);
+
+      let offsetX = 0, offsetY = 0, isDragging = false;
+
+      label.addEventListener("mousedown", (event) => {
+        if (event.target === deleteBtn) return;
+        isDragging = true;
+        offsetX = event.clientX - label.offsetLeft;
+        offsetY = event.clientY - label.offsetTop;
+        label.style.zIndex = 20;
+      });
+
+      document.addEventListener("mousemove", (event) => {
+        if (isDragging) {
+          label.style.left = (event.clientX - offsetX) + "px";
+          label.style.top = (event.clientY - offsetY) + "px";
+        }
+      });
+
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+        label.style.zIndex = 10;
+      });
+    };
+  </script>
+</body>
+</html>
