@@ -3,19 +3,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Room Map - Hover Expand Labels (Final Fix)</title>
+  <title>Interactive Room Map - Final</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       width: 100%;
+      overflow: hidden;
     }
     #room {
       position: relative;
       width: 100%;
       height: 100%;
-      background-color: #eef2f3;
+      background: url('floorplan.jpg') no-repeat center center;
+      background-size: contain;
     }
     .label {
       position: absolute;
@@ -45,8 +47,7 @@
       function createLabel(x, y, text = "Hover to expand") {
         const el = document.createElement("div");
         el.className = "label";
-        el.contentEditable = true;
-        el.innerText = text;
+        el.textContent = text;
         el.style.left = x + "px";
         el.style.top = y + "px";
         room.appendChild(el);
@@ -66,25 +67,6 @@
         });
 
         document.addEventListener("mouseup", () => dragging = false);
-
-        el.addEventListener("input", () => {
-          // Force plain text only
-          const textOnly = el.innerText.replace(/\n/g, " ");
-          el.innerHTML = '';
-          el.innerText = textOnly;
-        });
-
-        el.addEventListener("paste", e => {
-          e.preventDefault();
-          const text = (e.clipboardData || window.clipboardData).getData("text/plain");
-          document.execCommand("insertText", false, text.replace(/\n/g, " "));
-        });
-
-        el.addEventListener("keypress", e => {
-          if (e.key === "Enter") e.preventDefault();
-        });
-
-        return el;
       }
 
       room.addEventListener("click", e => {
